@@ -1,0 +1,47 @@
+---
+api:
+    version: 0.0.1
+
+app:
+    env: dev
+    debug: true
+
+mail:
+    driver: smtp
+    host: smtp.sample.ru
+    port: 465
+    user: sample@ysample.ru
+    password: sample
+    encryprion: ssl
+
+rabbitmq:
+    user: admin
+    password: mqadmin
+    host: rabbitmq
+
+db:
+    name: sample
+    user: sample
+    pass: sample
+
+docker:
+    network: sample_default
+    images:
+        app:
+            name: api
+            image: registry.magora.team/sample/app
+            port: 8082
+            host: 0.0.0.0
+        worker:
+            name: worker
+            image: registry.magora.team/samples/worker
+        rabbitmq:
+            name: rabbitmq
+            image: tutum/rabbitmq
+        postgres:
+            name: postgres
+            image: library/postgres
+            port: 5432
+            host: 127.0.0.1
+            data: /var/lib/postgresql/data/pgdata
+

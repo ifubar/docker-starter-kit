@@ -1,0 +1,79 @@
+---
+
+#https://github.com/ansible/ansible/issues/17495
+- name: fix docker-py version comparition bug
+  pip:
+    name: docker-py
+    version: 1.9.0
+    state: forcereinstall
+
+- name: Log into registry and force re-authorization
+  docker_login:
+    registry: "{{ registry.uri }}"
+    username: "{{ registry.login }}"
+    password: "{{ registry.password }}"
+    reauthorize: yes
+
+- name: Create a network
+  shell: "docker network create {{docker.network}}"
+  ignore_errors: yes
+
+- name: Restart a container APP
+  docker_container:
+    name: "{{docker.images.app.name}}"
+    image: "{{docker.images.app.image}}:{{app.env}}"
+    pull: true
+    recreate: yes
+    state: started
+    restart_policy: always
+    restart: yes
+    ports:
+      - "{{docker.images.app.host}}:{{docker.images.app.port}}:80"
+    networks:
+      - name: "{{docker.network}}"
+    env:
+      APP_ENV: "{{app.env}}"
+      APP_DEBUG: "{{app.debug}}"
+
+- name: Restart a container WORKER
+  docker_container:
+    name: "{{docker.images.worker.name}}"
+    image: "{{docker.images.worker.image}}:{{app.env}}"
+    pull: true
+    recreate: yes
+    state: started
+    restart: yes
+    restart_policy: always
+    networks:
+      - name: "{{docker.network}}"
+    env:
+      APP_ENV: "{{app.env}}"
+      APP_DEBUG: "{{app.debug}}"
+
+- name: Restart a container RABBITMQ
+  docker_container:
+    name: "{{docker.images.rabbitmq.name}}"
+    image: "{{docker.images.rabbitmq.image}}"
+    pull: true
+    state: started
+    restart_policy: always
+    networks:
+      - name: "{{docker.network}}"
+    env:
+      RABBITMQ_PASS: "{{rabbitmq.password}}"
+
+- name: Restart a container POSTGRES
+  docker_container:
+    name: "{{docker.images.postgres.name}}"
+    image: "{{docker.images.postgres.image}}"
+    pull: true
+    state: started
+    restart_policy: always
+    networks:
+      - name: "{{docker.network}}"
+    env:
+      POSTGRES_PASSWORD: "{{db.pass}}"
+      POSTGRES_USER: "{{db.user}}"
+      POSTGRES_DB: "{{db.name}}"
+      PGDATA: "{{docker.images.postgres.data}}"
+

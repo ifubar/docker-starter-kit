@@ -1,0 +1,52 @@
+version: '2'
+
+services:
+    app:
+        networks:
+            - default
+        build:
+            context: .
+            dockerfile: ./docker/app/Dockerfile
+        container_name: app
+        volumes:
+            - ./app:/app
+        ports:
+            - 127.0.0.1:8082:80
+        environment:
+            - APP_ENV=dev
+            - APP_DEBUG=true
+    rabbitmq:
+        networks:
+            - default
+        image: tutum/rabbitmq
+        container_name: rabbitmq
+        environment:
+            - RABBITMQ_PASS=mqadmin
+
+    worker:
+        networks:
+            - default
+        build:
+            context: .
+            dockerfile: ./docker/worker/Dockerfile
+        container_name: worker
+        restart: always
+        links:
+          - rabbitmq
+        volumes:
+            - ./worker:/worker
+        environment:
+            - APP_ENV=production
+            - APP_DEBUG=false
+
+    postgres:
+        networks:
+            - default
+        image: library/postgres
+        container_name: postgres
+        environment:
+            - POSTGRES_PASSWORD=sample
+            - POSTGRES_USER=sample
+            - POSTGRES_DB=sample
+        ports:
+            - 127.0.0.1:5432:5432
