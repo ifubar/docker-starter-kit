@@ -7,5 +7,6 @@
 - postgresql9.5+
 
 ## how to local start
+- install docker, docker-compose
 - docker-compose up
 - http://localhost:8082
