@@ -29,6 +29,12 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ 
 #uncomment
 #RUN composer install  --no-interaction --no-dev --optimize-autoloader
 
+#install xdebug
+RUN pecl install xdebug
+ADD docker/app/xdebug /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN sed -i "s/MYHOST/$(/sbin/ip route|awk '/default/ { print $3 }')/g" /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+RUN docker-php-ext-enable xdebug
+
 RUN usermod -u 1001 www-data
 RUN chown -R www-data .
 
